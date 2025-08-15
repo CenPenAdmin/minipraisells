@@ -26,7 +26,7 @@ app.use(cors({
             'http://localhost:3000',
             'http://127.0.0.1:3000',
             'https://CenPenAdmin.github.io',
-            'https://f2c07e99fbd6.ngrok-free.app'
+            'https://7cd35360633.ngrok-free.app'
         ];
         
         const allowedPatterns = [
@@ -73,6 +73,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use(express.static('.')); // Serve static files from current directory
+app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve images
 
 // Connect to MongoDB
 async function connectToMongoDB() {
@@ -127,52 +128,65 @@ async function addSampleAuctions() {
     const sampleAuctions = [
         {
             id: 'auction1',
-            artistName: 'Digital Dreams Studio',
-            artworkTitle: 'Neon Cityscape',
-            description: 'A vibrant digital painting of a futuristic city at night',
-            reserveBid: 50,
+            artistName: 'Sue Hipple',
+            artworkTitle: 'Collection Piece #1',
+            description: 'Beautiful artwork from Sue Hipple\'s exclusive collection',
+            reserveBid: 25,
             currentHighBid: 0,
             highestBidder: null,
-            imageUrl: null,
+            imageUrl: '/images/SueHipple1.jpg',
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
             active: true,
             createdAt: new Date()
         },
         {
             id: 'auction2',
-            artistName: 'Pixel Perfect Arts',
-            artworkTitle: 'Abstract Waves',
-            description: 'Beautiful flowing abstract waves in digital medium',
-            reserveBid: 75,
+            artistName: 'Sue Hipple',
+            artworkTitle: 'Collection Piece #2',
+            description: 'Stunning artwork from Sue Hipple\'s exclusive collection',
+            reserveBid: 35,
             currentHighBid: 0,
             highestBidder: null,
-            imageUrl: null,
+            imageUrl: '/images/SueHipple2.jpg',
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             active: true,
             createdAt: new Date()
         },
         {
             id: 'auction3',
-            artistName: 'Virtual Canvas Co.',
-            artworkTitle: 'Mountain Sunrise',
-            description: 'Serene digital landscape of mountains at sunrise',
-            reserveBid: 30,
+            artistName: 'Sue Hipple',
+            artworkTitle: 'Collection Piece #3',
+            description: 'Exquisite artwork from Sue Hipple\'s exclusive collection',
+            reserveBid: 50,
             currentHighBid: 0,
             highestBidder: null,
-            imageUrl: null,
+            imageUrl: '/images/SueHipple3.jpg',
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             active: true,
             createdAt: new Date()
         },
         {
             id: 'auction4',
-            artistName: 'AI Art Collective',
-            artworkTitle: 'Geometric Dreams',
-            description: 'Intricate geometric patterns created with AI assistance',
-            reserveBid: 100,
+            artistName: 'Sue Hipple',
+            artworkTitle: 'Collection Piece #4',
+            description: 'Magnificent artwork from Sue Hipple\'s exclusive collection',
+            reserveBid: 45,
             currentHighBid: 0,
             highestBidder: null,
-            imageUrl: null,
+            imageUrl: '/images/SueHipple4.jpg',
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            active: true,
+            createdAt: new Date()
+        },
+        {
+            id: 'auction5',
+            artistName: 'Sue Hipple',
+            artworkTitle: 'Collection Piece #5',
+            description: 'Remarkable artwork from Sue Hipple\'s exclusive collection',
+            reserveBid: 60,
+            currentHighBid: 0,
+            highestBidder: null,
+            imageUrl: '/images/SueHipple5.jpg',
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             active: true,
             createdAt: new Date()
@@ -243,6 +257,27 @@ app.post('/api/user/balance', async (req, res) => {
     } catch (error) {
         console.error('Error getting user balance:', error);
         res.json({ success: false, message: 'Error retrieving balance' });
+    }
+});
+
+// Reset auctions endpoint (for development)
+app.post('/api/reset-auctions', async (req, res) => {
+    try {
+        // Clear existing auctions
+        await db.collection('auctions').deleteMany({});
+        console.log('🗑️ Cleared existing auctions');
+        
+        // Add new sample auctions
+        await addSampleAuctions();
+        
+        res.json({
+            success: true,
+            message: 'Auctions reset successfully'
+        });
+        
+    } catch (error) {
+        console.error('Error resetting auctions:', error);
+        res.json({ success: false, message: 'Error resetting auctions' });
     }
 });
 
