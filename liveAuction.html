@@ -251,8 +251,9 @@
     <div class="auction-container">
         <!-- Navigation Bar -->
         <div class="navigation-bar">
-            <a href="profile.html" class="nav-button">← Back to Profile</a>
+            <a href="#" onclick="goToProfile()" class="nav-button">← Back to Profile</a>
             <a href="index.html" class="nav-button">Home</a>
+            <span id="testModeIndicator" style="color: #ff6b6b; font-weight: bold; margin-left: 20px;"></span>
         </div>
 
         <!-- User Balance Display -->
@@ -298,21 +299,46 @@
         let userBalance = 0;
         let auctions = [];
         let userBids = {};
+        let isTestMode = false;
+
+        // Check if we're in test mode
+        const urlParams = new URLSearchParams(window.location.search);
+        isTestMode = urlParams.get('testMode') === 'true';
 
         // Initialize the application
         async function initializeApp() {
             try {
-                Pi.init({ version: "2.0", sandbox: true });
+                if (isTestMode) {
+                    // Create test user without Pi Network authentication
+                    currentUser = {
+                        username: 'TestUser_Demo',
+                        uid: 'test_user_12345',
+                        accessToken: 'test_token'
+                    };
+                    
+                    console.log('Test mode activated - Demo user created:', currentUser);
+                    
+                    // Load user balance and auctions
+                    await loadUserBalance();
+                    await loadAuctions();
+                    
+                } else {
+                    // Normal Pi Network authentication
+                    Pi.init({ version: "2.0", sandbox: true });
+                    
+                    // Authenticate user
+                    const auth = await Pi.authenticate(['username'], onIncompletePaymentFound);
+                    currentUser = auth.user;
+                    
+                    console.log('User authenticated:', currentUser);
+                    
+                    // Load user balance and auctions
+                    await loadUserBalance();
+                    await loadAuctions();
+                }
                 
-                // Authenticate user
-                const auth = await Pi.authenticate(['username'], onIncompletePaymentFound);
-                currentUser = auth.user;
-                
-                console.log('User authenticated:', currentUser);
-                
-                // Load user balance and auctions
-                await loadUserBalance();
-                await loadAuctions();
+                // Update test mode indicator
+                updateTestModeIndicator();
                 
             } catch (error) {
                 console.error('Authentication failed:', error);
@@ -542,6 +568,19 @@
         // Handle incomplete payments (not needed for appraiCENTS but required by Pi SDK)
         function onIncompletePaymentFound(payment) {
             console.log('Incomplete payment found (not applicable for appraiCENTS):', payment);
+        }
+
+        // Navigation function
+        function goToProfile() {
+            const testModeParam = isTestMode ? '?testMode=true' : '';
+            window.location.href = `profile.html${testModeParam}`;
+        }
+
+        // Update test mode indicator
+        function updateTestModeIndicator() {
+            if (isTestMode) {
+                document.getElementById('testModeIndicator').textContent = '🎮 TEST MODE';
+            }
         }
 
         // Auto-refresh auctions every 30 seconds

@@ -145,6 +145,12 @@
       <h2>Loading user profile...</h2>
     </div>
 
+    <!-- Test Mode Banner -->
+    <div id="testModeBanner" style="display: none; background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <h3 style="margin: 0;">🎮 TEST MODE ACTIVE</h3>
+      <p style="margin: 5px 0;">You're using a demo account with virtual currency. No real payments required!</p>
+    </div>
+
     <!-- appraiCENTS Balance Section -->
     <div class="balance-section">
       <h2>💰 Your appraiCENTS Balance</h2>
@@ -183,27 +189,61 @@
   <script>
     let currentUser = null;
     let userBalance = 0;
+    let isTestMode = false;
 
-    // Initialize Pi SDK and authenticate user
+    // Check if we're in test mode
+    const urlParams = new URLSearchParams(window.location.search);
+    isTestMode = urlParams.get('testMode') === 'true';
+
+    // Initialize Pi SDK and authenticate user (or create test user)
     async function initializeApp() {
       try {
-        Pi.init({ version: "2.0", sandbox: true });
+        if (isTestMode) {
+          // Create test user without Pi Network authentication
+          currentUser = {
+            username: 'TestUser_Demo',
+            uid: 'test_user_12345',
+            accessToken: 'test_token'
+          };
+          
+          console.log('Test mode activated - Demo user created:', currentUser);
+          
+          // Display test user info
+          document.getElementById('userInfo').innerHTML = `
+            <h2>🎮 Welcome, ${currentUser.username}!</h2>
+            <p><strong>User ID:</strong> ${currentUser.uid}</p>
+            <p><strong>Platform:</strong> Mini Praisells Auction Platform</p>
+            <p style="color: #ff6b6b;"><strong>🎯 TEST MODE:</strong> Demo account for testing</p>
+          `;
+          
+          // Load user's appraiCENTS balance (will create account if needed)
+          await loadUserBalance();
+          
+        } else {
+          // Normal Pi Network authentication
+          Pi.init({ version: "2.0", sandbox: true });
+          
+          // Authenticate user
+          const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+          currentUser = auth.user;
+          
+          console.log('User authenticated:', currentUser);
+          
+          // Display user info
+          document.getElementById('userInfo').innerHTML = `
+            <h2>Welcome, ${currentUser.username}!</h2>
+            <p><strong>User ID:</strong> ${currentUser.uid}</p>
+            <p><strong>Platform:</strong> Mini Praisells Auction Platform</p>
+          `;
+          
+          // Load user's appraiCENTS balance
+          await loadUserBalance();
+        }
         
-        // Authenticate user
-        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-        currentUser = auth.user;
-        
-        console.log('User authenticated:', currentUser);
-        
-        // Display user info
-        document.getElementById('userInfo').innerHTML = `
-          <h2>Welcome, ${currentUser.username}!</h2>
-          <p><strong>User ID:</strong> ${currentUser.uid}</p>
-          <p><strong>Platform:</strong> Mini Praisells Auction Platform</p>
-        `;
-        
-        // Load user's appraiCENTS balance
-        await loadUserBalance();
+        // Show test mode banner if in test mode
+        if (isTestMode) {
+          document.getElementById('testModeBanner').style.display = 'block';
+        }
         
       } catch (error) {
         console.error('Authentication failed:', error);
@@ -245,7 +285,8 @@
 
     // Navigation functions
     function goToAuctions() {
-      window.location.href = 'liveAuction.html';
+      const testModeParam = isTestMode ? '?testMode=true' : '';
+      window.location.href = `liveAuction.html${testModeParam}`;
     }
 
     function viewMyBids() {

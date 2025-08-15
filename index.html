@@ -89,9 +89,12 @@
     </div>
   </div>
 
- <!-- Pi Network Login Button -->
+ <!-- Login Options -->
   <div id="login-section" style="margin-top: 50px; text-align: center;">
-    <button id="loginBtn" style="padding:12px 25px; font-size:2em; background-color:#030006; color: white; border:none; border-radius:6px; cursor:pointer;">Login with Pi Network</button>
+    <button id="loginBtn" style="padding:12px 25px; font-size:2em; background-color:#030006; color: white; border:none; border-radius:6px; cursor:pointer; margin: 10px;">Login with Pi Network</button>
+    <br>
+    <button id="testModeBtn" style="padding:12px 25px; font-size:1.8em; background-color:#ff6b6b; color: white; border:none; border-radius:6px; cursor:pointer; margin: 10px;">🎮 Test Mode (Demo User)</button>
+    <p style="color: #666; margin-top: 10px; font-size: 0.9em;">Test Mode creates a demo user with 1,000 appraiCENTS to try the platform</p>
   </div>
 
   <!-- Main Section -->
@@ -101,18 +104,20 @@
   <!-- Manual Login Section removed -->
 
   <script>
-    // Connect login button to Pi authentication
+    // Connect login buttons
     document.getElementById("loginBtn").onclick = login;
+    document.getElementById("testModeBtn").onclick = testModeLogin;
     Pi.init({ version: "2.0", sandbox: true });
 
-   
-
-    // Manual login removed
-    
     function login() {
-  // Simply redirect to profile page - it will handle its own Pi authentication
-  window.location.href = 'profile.html';
-}
+      // Simply redirect to profile page - it will handle its own Pi authentication
+      window.location.href = 'profile.html';
+    }
+    
+    function testModeLogin() {
+      // Redirect to profile page with test mode parameter
+      window.location.href = 'profile.html?testMode=true';
+    }
     
   </script>
 
