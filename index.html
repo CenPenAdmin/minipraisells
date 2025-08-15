@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Praisells</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+
+    header {
+      background-color: #030006;
+      padding: 20px 0;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3.5em;
+      color: white;
+      text-align: center;
+    }
+
+  h3 {
+    text-align: center;
+    font-size: 2.5em;
+    color: rgb(5, 0, 0);
+
+  }
+
+  body { 
+    background-color: #fcfcfc;
+  }
+
+  body, h1, h2, h3, h4, h5, h6, p, button, span, div {
+  text-shadow: 2px 2px 6px #7b4646;
+}
+
+  .intro-section {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+  }
+
+  .appraicents-info {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 2px solid #ffd700;
+  }
+
+  .appraicents-info h4 {
+    color: #030006;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+  }
+
+  .appraicents-info p {
+    color: #333;
+    margin: 8px 0;
+    font-size: 1.1em;
+  }
+    
+  </style>
+</head>
+<body>
+
+
+  <!-- Banner -->
+  <header>
+    <h1>MINI PRAISELLS</h1>
+  </header>
+
+<h3>VIRTUAL ART AUCTIONS. PLAY MONEY. REAL FUN.</h3>
+
+  <!-- Introduction Section -->
+  <div class="intro-section">
+    <h4>Welcome to Mini Praisells!</h4>
+    <p>A recreational auction platform where you can bid on digital art using virtual currency.</p>
+    
+    <div class="appraicents-info">
+      <h4>💰 About appraiCENTS</h4>
+      <p>🎮 <strong>Virtual Currency:</strong> appraiCENTS have no real-world value</p>
+      <p>🎁 <strong>Starting Balance:</strong> Every user begins with 1,000 appraiCENTS</p>
+      <p>🎯 <strong>Pure Recreation:</strong> Bid, win, and enjoy the auction experience!</p>
+      <p>🏆 <strong>No Real Payments:</strong> All transactions are fictional and for fun</p>
+    </div>
+  </div>
+
+ <!-- Pi Network Login Button -->
+  <div id="login-section" style="margin-top: 50px; text-align: center;">
+    <button id="loginBtn" style="padding:12px 25px; font-size:2em; background-color:#030006; color: white; border:none; border-radius:6px; cursor:pointer;">Login with Pi Network</button>
+  </div>
+
+  <!-- Main Section -->
+  <div id="main-section">   
+    <!-- Enter Create Profile Button removed -->
+
+  <!-- Manual Login Section removed -->
+
+  <script>
+    // Connect login button to Pi authentication
+    document.getElementById("loginBtn").onclick = login;
+    Pi.init({ version: "2.0", sandbox: true });
+
+   
+
+    // Manual login removed
+    
+    function login() {
+  // Simply redirect to profile page - it will handle its own Pi authentication
+  window.location.href = 'profile.html';
+}
+    
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Auction - Mini Praisells</title>
+    
+    <!-- Configuration -->
+    <script src="config.js"></script>
+    
+    <!-- Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: #030006;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        
+        header {
+            background-color: #030006;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 3.5em;
+            color: white;
+            text-align: center;
+        }
+        
+        .auction-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .user-balance {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .user-balance h3 {
+            margin: 0 0 10px 0;
+            color: #030006;
+        }
+
+        .balance-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #030006;
+        }
+        
+        .auction-title {
+            text-align: center;
+            font-size: 2em;
+            margin: 30px 0;
+            color: #030006;
+        }
+        
+        .auction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .auction-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f9f9f9;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .auction-item:hover {
+            box-shadow: 0 4px 15px rgba(3, 0, 6, 0.2);
+        }
+        
+        .artist-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #030006;
+            margin-bottom: 8px;
+        }
+        
+        .artwork-title {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .reserve-bid {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #030006;
+            margin-bottom: 20px;
+        }
+        
+        .artwork-image {
+            width: 100%;
+            height: 240px;
+            background: #ddd;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1em;
+        }
+        
+        .bid-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        
+        .bid-input {
+            width: 80px;
+            padding: 8px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 0 10px;
+            text-align: center;
+        }
+        
+        .bid-button {
+            background: #030006;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .bid-button:hover {
+            background: #1a1a1a;
+        }
+        
+        .bid-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .remove-bid-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .remove-bid-button:hover {
+            background: #c82333;
+        }
+        
+        .remove-bid-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .bid-status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .highest-bidder {
+            background: #d4edda;
+            color: #155724;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .navigation-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .nav-button {
+            background: #030006;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            background: #1a1a1a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .currency-info {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MINI PRAISELLS</h1>
+    </header>
+
+    <div class="auction-container">
+        <!-- Navigation Bar -->
+        <div class="navigation-bar">
+            <a href="profile.html" class="nav-button">← Back to Profile</a>
+            <a href="index.html" class="nav-button">Home</a>
+        </div>
+
+        <!-- User Balance Display -->
+        <div class="user-balance" id="userBalance">
+            <h3>💰 Your appraiCENTS Balance</h3>
+            <div class="balance-amount" id="balanceAmount">Loading...</div>
+        </div>
+
+        <!-- Currency Info -->
+        <div class="currency-info">
+            <h4>🎮 About appraiCENTS Bidding</h4>
+            <p>• appraiCENTS are virtual currency with no real-world value</p>
+            <p>• Minimum bid increment: 1 aC</p>
+            <p>• All transactions are for recreational purposes only</p>
+            <p>• Have fun bidding on digital art!</p>
+        </div>
+
+        <!-- Auction Title -->
+        <div class="auction-title">
+            <h2>🎨 Live Digital Art Auctions</h2>
+            <p>Bid with appraiCENTS on beautiful digital artwork</p>
+        </div>
+
+        <!-- Loading/Error States -->
+        <div id="loadingState" class="loading">
+            Loading auctions...
+        </div>
+
+        <div id="errorState" class="error" style="display: none;">
+            <h3>Error Loading Auctions</h3>
+            <p id="errorMessage"></p>
+            <button onclick="loadAuctions()" class="bid-button">Retry</button>
+        </div>
+
+        <!-- Auction Grid -->
+        <div id="auctionGrid" class="auction-grid" style="display: none;">
+            <!-- Auction items will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userBalance = 0;
+        let auctions = [];
+        let userBids = {};
+
+        // Initialize the application
+        async function initializeApp() {
+            try {
+                Pi.init({ version: "2.0", sandbox: true });
+                
+                // Authenticate user
+                const auth = await Pi.authenticate(['username'], onIncompletePaymentFound);
+                currentUser = auth.user;
+                
+                console.log('User authenticated:', currentUser);
+                
+                // Load user balance and auctions
+                await loadUserBalance();
+                await loadAuctions();
+                
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                showError('Authentication failed. Please try logging in again.');
+            }
+        }
+
+        // Load user's appraiCENTS balance
+        async function loadUserBalance() {
+            try {
+                const response = await fetch(`${CONFIG.SERVER_URL}/api/user/balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: currentUser.uid,
+                        username: currentUser.username
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    userBalance = data.balance;
+                    document.getElementById('balanceAmount').textContent = `${userBalance.toLocaleString()} aC`;
+                } else {
+                    throw new Error(data.message || 'Failed to load balance');
+                }
+            } catch (error) {
+                console.error('Error loading balance:', error);
+                document.getElementById('balanceAmount').textContent = 'Error loading balance';
+            }
+        }
+
+        // Load auction data
+        async function loadAuctions() {
+            try {
+                const response = await fetch(`${CONFIG.SERVER_URL}/api/auctions`);
+                const data = await response.json();
+
+                if (data.success) {
+                    auctions = data.auctions;
+                    await loadUserBids();
+                    renderAuctions();
+                } else {
+                    throw new Error(data.message || 'Failed to load auctions');
+                }
+            } catch (error) {
+                console.error('Error loading auctions:', error);
+                showError('Failed to load auctions. Please check your connection and try again.');
+            }
+        }
+
+        // Load user's current bids
+        async function loadUserBids() {
+            try {
+                const response = await fetch(`${CONFIG.SERVER_URL}/api/user/bids`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: currentUser.uid
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    userBids = {};
+                    data.bids.forEach(bid => {
+                        userBids[bid.itemId] = bid;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user bids:', error);
+            }
+        }
+
+        // Render auction items
+        function renderAuctions() {
+            const grid = document.getElementById('auctionGrid');
+            
+            if (auctions.length === 0) {
+                grid.innerHTML = '<div class="loading">No auctions currently available.</div>';
+                grid.style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                return;
+            }
+
+            grid.innerHTML = auctions.map(auction => `
+                <div class="auction-item">
+                    <div class="artist-name">${auction.artistName}</div>
+                    <div class="artwork-title">"${auction.artworkTitle}"</div>
+                    <div class="artwork-image">
+                        ${auction.imageUrl ? `<img src="${auction.imageUrl}" alt="${auction.artworkTitle}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : 'Digital Artwork Preview'}
+                    </div>
+                    <div class="reserve-bid">Reserve: ${auction.reserveBid} aC</div>
+                    <div class="reserve-bid">Current High: ${auction.currentHighBid || auction.reserveBid} aC</div>
+                    
+                    ${auction.highestBidder ? `
+                        <div class="highest-bidder">
+                            Highest Bidder: ${auction.highestBidder === currentUser.username ? 'You!' : auction.highestBidder}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="bid-section">
+                        <div style="margin-bottom: 10px;">
+                            <label>Bid Amount:</label>
+                            <input type="number" 
+                                   id="bid-${auction.id}" 
+                                   class="bid-input" 
+                                   min="${(auction.currentHighBid || auction.reserveBid) + 1}"
+                                   max="${userBalance}"
+                                   value="${(auction.currentHighBid || auction.reserveBid) + 1}">
+                            <span>aC</span>
+                        </div>
+                        
+                        <button class="bid-button" 
+                                onclick="placeBid('${auction.id}')"
+                                ${userBalance < (auction.currentHighBid || auction.reserveBid) + 1 ? 'disabled' : ''}>
+                            Place Bid
+                        </button>
+                        
+                        ${userBids[auction.id] ? `
+                            <button class="remove-bid-button" onclick="removeBid('${auction.id}')">
+                                Remove My Bid
+                            </button>
+                            <div class="bid-status">
+                                Your current bid: ${userBids[auction.id].amount} aC
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            grid.style.display = 'grid';
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        // Place a bid
+        async function placeBid(auctionId) {
+            const bidInput = document.getElementById(`bid-${auctionId}`);
+            const bidAmount = parseInt(bidInput.value);
+            
+            if (!bidAmount || bidAmount <= 0) {
+                alert('Please enter a valid bid amount.');
+                return;
+            }
+
+            if (bidAmount > userBalance) {
+                alert('Insufficient appraiCENTS! Your balance is ' + userBalance + ' aC');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.SERVER_URL}/api/bid`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: currentUser.uid,
+                        username: currentUser.username,
+                        auctionId: auctionId,
+                        bidAmount: bidAmount
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Bid placed successfully!');
+                    await loadUserBalance();
+                    await loadAuctions();
+                } else {
+                    alert('Error placing bid: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error placing bid:', error);
+                alert('Error placing bid. Please try again.');
+            }
+        }
+
+        // Remove a bid
+        async function removeBid(auctionId) {
+            if (!confirm('Are you sure you want to remove your bid? Your appraiCENTS will be refunded.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.SERVER_URL}/api/bid/remove`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: currentUser.uid,
+                        auctionId: auctionId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Bid removed successfully! appraiCENTS refunded.');
+                    await loadUserBalance();
+                    await loadAuctions();
+                } else {
+                    alert('Error removing bid: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error removing bid:', error);
+                alert('Error removing bid. Please try again.');
+            }
+        }
+
+        // Show error state
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('auctionGrid').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // Handle incomplete payments (not needed for appraiCENTS but required by Pi SDK)
+        function onIncompletePaymentFound(payment) {
+            console.log('Incomplete payment found (not applicable for appraiCENTS):', payment);
+        }
+
+        // Auto-refresh auctions every 30 seconds
+        setInterval(() => {
+            if (currentUser) {
+                loadAuctions();
+            }
+        }, 30000);
+
+        // Initialize the app when page loads
+        window.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

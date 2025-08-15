@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile - Mini Praisells</title>
+  
+  <!-- Configuration -->
+  <script src="config.js"></script>
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <style>
+    header {
+      background-color: #030006;
+      padding: 20px 0;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3.5em;
+      color: white;
+      text-align: center;
+    }
+
+    body { 
+      background-color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .profile-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .balance-section {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      border: 3px solid #ffd700;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    .balance-section h2 {
+      color: #030006;
+      margin: 0 0 15px 0;
+      font-size: 2em;
+    }
+
+    .balance-amount {
+      font-size: 3em;
+      font-weight: bold;
+      color: #030006;
+      margin: 10px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .navigation-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .nav-card {
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .nav-card:hover {
+      box-shadow: 0 4px 15px rgba(3, 0, 6, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nav-card h3 {
+      color: #030006;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    .nav-card p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .nav-button {
+      background: #030006;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .nav-button:hover {
+      background: #1a1a1a;
+    }
+
+    .user-info {
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .disclaimer {
+      background: #e8f4f8;
+      border-left: 4px solid #17a2b8;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .disclaimer h4 {
+      color: #0c5460;
+      margin-top: 0;
+    }
+
+    .disclaimer p {
+      color: #0c5460;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MINI PRAISELLS</h1>
+  </header> 
+  
+  <div class="profile-container">
+    <!-- User Info Section -->
+    <div id="userInfo" class="user-info">
+      <h2>Loading user profile...</h2>
+    </div>
+
+    <!-- appraiCENTS Balance Section -->
+    <div class="balance-section">
+      <h2>💰 Your appraiCENTS Balance</h2>
+      <div class="balance-amount" id="appraiCentsBalance">Loading...</div>
+      <p style="color: #333; font-size: 1.1em; margin: 10px 0;">Virtual currency for auction bidding</p>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="navigation-section">
+      <div class="nav-card" onclick="goToAuctions()">
+        <h3>🎨 Live Auctions</h3>
+        <p>Browse and bid on digital art with your appraiCENTS</p>
+        <button class="nav-button">View Auctions</button>
+      </div>
+
+      <div class="nav-card" onclick="viewMyBids()">
+        <h3>📊 My Bids</h3>
+        <p>Track your current bids and auction activity</p>
+        <button class="nav-button">View My Bids</button>
+      </div>
+
+      <div class="nav-card" onclick="viewMyWins()">
+        <h3>🏆 My Wins</h3>
+        <p>See the art pieces you've won in past auctions</p>
+        <button class="nav-button">View My Wins</button>
+      </div>
+    </div>
+
+    <!-- Disclaimer Section -->
+    <div class="disclaimer">
+      <h4>🎮 Recreational Use Only</h4>
+      <p>This is a recreational platform. appraiCENTS have no real-world value and cannot be exchanged for real currency. All auctions and transactions are for entertainment purposes only.</p>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let userBalance = 0;
+
+    // Initialize Pi SDK and authenticate user
+    async function initializeApp() {
+      try {
+        Pi.init({ version: "2.0", sandbox: true });
+        
+        // Authenticate user
+        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+        currentUser = auth.user;
+        
+        console.log('User authenticated:', currentUser);
+        
+        // Display user info
+        document.getElementById('userInfo').innerHTML = `
+          <h2>Welcome, ${currentUser.username}!</h2>
+          <p><strong>User ID:</strong> ${currentUser.uid}</p>
+          <p><strong>Platform:</strong> Mini Praisells Auction Platform</p>
+        `;
+        
+        // Load user's appraiCENTS balance
+        await loadUserBalance();
+        
+      } catch (error) {
+        console.error('Authentication failed:', error);
+        document.getElementById('userInfo').innerHTML = `
+          <h2>Authentication Failed</h2>
+          <p>Please try logging in again. Error: ${error.message}</p>
+          <button onclick="window.location.href='index.html'" style="padding: 10px 20px; background: #030006; color: white; border: none; border-radius: 4px; cursor: pointer;">Return to Home</button>
+        `;
+      }
+    }
+
+    // Load user's appraiCENTS balance from server
+    async function loadUserBalance() {
+      try {
+        const response = await fetch(`${CONFIG.SERVER_URL}/api/user/balance`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            uid: currentUser.uid,
+            username: currentUser.username
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          userBalance = data.balance;
+          document.getElementById('appraiCentsBalance').textContent = `${userBalance.toLocaleString()} aC`;
+        } else {
+          throw new Error(data.message || 'Failed to load balance');
+        }
+      } catch (error) {
+        console.error('Error loading balance:', error);
+        document.getElementById('appraiCentsBalance').textContent = 'Error loading balance';
+      }
+    }
+
+    // Navigation functions
+    function goToAuctions() {
+      window.location.href = 'liveAuction.html';
+    }
+
+    function viewMyBids() {
+      // This would redirect to a bids tracking page
+      alert('My Bids feature coming soon!');
+    }
+
+    function viewMyWins() {
+      // This would redirect to a wins/collection page
+      alert('My Wins feature coming soon!');
+    }
+
+    // Handle incomplete payments (not needed for appraiCENTS but required by Pi SDK)
+    function onIncompletePaymentFound(payment) {
+      console.log('Incomplete payment found (not applicable for appraiCENTS):', payment);
+    }
+
+    // Initialize the app when page loads
+    window.addEventListener('DOMContentLoaded', initializeApp);
+  </script>
+
+</body>
+</html>
