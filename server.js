@@ -24,6 +24,7 @@ app.use(cors({
         
         const allowedOrigins = [
             'http://localhost:3000',
+            'http://127.0.0.1:3000',
             'https://CenPenAdmin.github.io',
             'https://f2c07e99fbd6.ngrok-free.app'
         ];
@@ -31,7 +32,9 @@ app.use(cors({
         const allowedPatterns = [
             /^https:\/\/.*\.ngrok\.io$/,
             /^https:\/\/.*\.ngrok-free\.app$/,
-            /^https:\/\/.*\.github\.io$/
+            /^https:\/\/.*\.github\.io$/,
+            /^http:\/\/localhost:\d+$/,
+            /^http:\/\/127\.0\.0\.1:\d+$/
         ];
         
         // Check exact matches

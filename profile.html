@@ -219,6 +219,9 @@
           // Load user's appraiCENTS balance (will create account if needed)
           await loadUserBalance();
           
+          // Show test mode banner
+          document.getElementById('testModeBanner').style.display = 'block';
+          
         } else {
           // Normal Pi Network authentication
           Pi.init({ version: "2.0", sandbox: true });
@@ -238,11 +241,6 @@
           
           // Load user's appraiCENTS balance
           await loadUserBalance();
-        }
-        
-        // Show test mode banner if in test mode
-        if (isTestMode) {
-          document.getElementById('testModeBanner').style.display = 'block';
         }
         
       } catch (error) {
