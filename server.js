@@ -26,7 +26,7 @@ app.use(cors({
             'http://localhost:3000',
             'http://127.0.0.1:3000',
             'https://CenPenAdmin.github.io',
-            'https://7cd35360633.ngrok-free.app'
+            'https://a595d20e429a.ngrok-free.app'
         ];
         
         const allowedPatterns = [

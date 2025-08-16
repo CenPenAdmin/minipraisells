@@ -1,7 +1,7 @@
 // Configuration for Mini Praisells
 const CONFIG = {
     // Server configuration
-    SERVER_URL: 'https://7cd353d60633.ngrok-free.app',
+    SERVER_URL: 'https://a595d20e429a.ngrok-free.app',
     
     // Virtual currency settings
     STARTING_APPRAICENTS: 1000,
